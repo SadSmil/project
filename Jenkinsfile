@@ -7,53 +7,52 @@ pipeline {
     }
     
     parameters {
-        choice(name: 'Environements', choices: ['Env_1', 'Env2', 'Env3'], description: 'Choix des environnements')
-        booleanParam(name: 'select_tout', defaultValue: false, description: 'Lancer tout')
-        booleanParam(name: 'selection', defaultValue: false, description: 'Lancer selon le choix')
-        booleanParam(name: 'cocher_collection', defaultValue: false, description: 'Cocher pour inclure la collection dans le run')
+        // Choix de l'environnement (utilisé uniquement si la case "avec_ou_sans_env" est cochée)
+        choice(name: 'Environements', choices: ['Env_1', 'Env2'], description: 'Choix de l\'environnement')
+        
+        // Les 2 cases à cocher de votre logique
+        booleanParam(name: 'avec_ou_sans_env', defaultValue: false, description: 'Cocher pour utiliser un environnement (Décoché = Sans environnement)')
+        booleanParam(name: 'cocher_collection', defaultValue: false, description: 'Cocher pour valider et lancer l\'exécution')
     }
 
     stages {
         stage('Lancer le test') {
             steps {
                 script {
-                    if (params.select_tout) {
-                        echo "Option 'Lancer tout' activée. Exécution générale..."
-                        sh 'newman run collection.json'
-                        sh "newman run env1_collection.json -e environements/env1.postman_environment.json"
-                        sh "newman run env2_collection.json -e environements/env2.postman_environment.json"
-                    } 
-                
-                    else if (params.selection) {
-                        echo "Option 'Lancer selon le choix' activée."
+                    // 1. On vérifie d'abord si la case globale pour lancer la collection est cochée
+                    if (params.cocher_collection) {
                         
-                        // On vérifie si la case de la collection a bien été cochée
-                        if (params.cocher_collection) {
-                            echo "La collection est cochée. Application de l'environnement : ${params.Environements}"
+                        // 2. CAS SANS ENVIRONNEMENT (La case "avec_ou_sans_env" n'est PAS cochée)
+                        if (!params.avec_ou_sans_env) {
+                            echo "Exécution de la collection principale SANS environnement..."
+                            sh 'newman run collection.json'
+                        } 
+                        
+                        // 3. CAS AVEC ENVIRONNEMENT (La case "avec_ou_sans_env" EST cochée)
+                        else {
+                            echo "Exécution avec environnement activée. Choix : ${params.Environements}"
                             
-                            // Switch classique pour injecter le bon fichier selon l'environnement choisi
                             switch(params.Environements) {
                                 case 'Env_1':
+                                    echo "Lancement de la collection dédiée à Env_1..."
                                     sh "newman run env1_collection.json -e environements/env1.postman_environment.json"
                                     break
+                                    
                                 case 'Env2':
+                                    echo "Lancement de la collection dédiée à Env2..."
                                     sh "newman run env2_collection.json -e environements/env2.postman_environment.json"
                                     break
-                                case 'Env3':
-                                    sh "newman run env3_collection.json -e environements/env3.postman_environment.json"
-                                    break
+                                    
                                 default:
-                                    error "Environnement non supporté : ${params.Environements}"
+                                    error "Environnement inconnu : ${params.Environements}"
                                     break
                             }
-                        } else {
-                            echo "L'option 'Lancer selon le choix' est cochée, mais la case 'cocher_collection' ne l'est pas. Rien à lancer."
                         }
+                        
                     } 
-                    
-                    // 3. Si aucune des cases principales n'est cochée
+                    // Si la case de la collection n'est pas cochée, on ne fait rien
                     else {
-                        echo "Aucun mode d'exécution sélectionné (ni 'Lancer tout', ni 'Lancer selon le choix')."
+                        echo "La case 'cocher_collection' n'est pas activée. Aucun test ne sera lancé."
                     }
                 }
             }
