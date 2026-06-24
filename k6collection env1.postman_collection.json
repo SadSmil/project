@@ -1,0 +1,146 @@
+{
+  "info": {
+    "_postman_id": "eb2d1817-911f-4ac7-9962-39d48869ef24",
+    "name": "k6collection env1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "26142713",
+    "_collection_link": "https://go.postman.co/collection/26142713-eb2d1817-911f-4ac7-9962-39d48869ef24?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "get all brands",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Response time is less than 250ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(250);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{URL1}}brands",
+          "host": [
+            "{{URL1}}brands"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add brands",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "pm.test(\"Response time is less than 250ms\", function () {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(250);\r",
+              "});\r",
+              "pm.test(\"check body request\", function () {\r",
+              "console.log(\"hello\")\r",
+              "    let res_body = pm.response.json()\r",
+              "    let req_body = JSON.parse(pm.request.body.raw)\r",
+              "    pm.expect(res_body.name).to.equal(req_body.name)\r",
+              "    pm.expect(res_body.slug).to.equal(req_body.slug)    \r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {}
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\":\"name2000\",\r\n    \"slug\":\"slug2dgggg02034c4{{$randomFirstName}}\"\r\n\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{URL1}}brands",
+          "host": [
+            "{{URL1}}brands"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "URL1",
+      "value": "https://api.practicesoftwaretesting.com/brands"
+    }
+  ]
+}
