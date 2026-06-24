@@ -7,30 +7,53 @@ pipeline {
     }
     
     parameters {
-        booleanParam(name: 'LANCER_TOUS_LES_TESTS', defaultValue: false, description: 'Cocher pour lancer TOUTES les collections')
-        choice(name: 'COLLECTION_CHOICE', choices: ['collection', 'env1_collection', 'env2_collection'], description: 'Choisissez la collection à lancer')
-        choice(name: 'ENV_CHOICE', choices: ['AUCUN', 'ENV1', 'ENV2'], description: 'Choisissez environnement')
+        choice(name: 'Environements', choices: ['Env_1', 'Env2', 'Env3'], description: 'Choix des environnements')
+        booleanParam(name: 'select_tout', defaultValue: false, description: 'Lancer tout')
+        booleanParam(name: 'selection', defaultValue: false, description: 'Lancer selon le choix')
+        booleanParam(name: 'cocher_collection', defaultValue: false, description: 'Cocher pour inclure la collection dans le run')
     }
 
     stages {
         stage('Lancer le test') {
             steps {
                 script {
-                    if (params.LANCER_TOUS_LES_TESTS) {
-                        echo "Lancement global de toutes les collections"
+                    if (params.select_tout) {
+                        echo "Option 'Lancer tout' activée. Exécution générale..."
                         sh 'newman run collection.json'
                         sh "newman run env1_collection.json -e environements/env1.postman_environment.json"
                         sh "newman run env2_collection.json -e environements/env2.postman_environment.json"
                     } 
-                    else {                
-                        def envFlag = ""
-                        if (params.ENV_CHOICE == 'ENV1') {
-                            envFlag = "-e environements/env1.postman_environment.json"
-                        } else if (params.ENV_CHOICE == 'ENV2') {
-                            envFlag = "-e environements/env2.postman_environment.json"
+                
+                    else if (params.selection) {
+                        echo "Option 'Lancer selon le choix' activée."
+                        
+                        // On vérifie si la case de la collection a bien été cochée
+                        if (params.cocher_collection) {
+                            echo "La collection est cochée. Application de l'environnement : ${params.Environements}"
+                            
+                            // Switch classique pour injecter le bon fichier selon l'environnement choisi
+                            switch(params.Environements) {
+                                case 'Env_1':
+                                    sh "newman run env1_collection.json -e environements/env1.postman_environment.json"
+                                    break
+                                case 'Env2':
+                                    sh "newman run env2_collection.json -e environements/env2.postman_environment.json"
+                                    break
+                                case 'Env3':
+                                    sh "newman run env3_collection.json -e environements/env3.postman_environment.json"
+                                    break
+                                default:
+                                    error "Environnement non supporté : ${params.Environements}"
+                                    break
+                            }
+                        } else {
+                            echo "L'option 'Lancer selon le choix' est cochée, mais la case 'cocher_collection' ne l'est pas. Rien à lancer."
                         }
-                        // Si params.ENV_CHOICE == 'AUCUN', envFlag reste vide ""
-                        sh "newman run ${params.COLLECTION_CHOICE}.json ${envFlag}"
+                    } 
+                    
+                    // 3. Si aucune des cases principales n'est cochée
+                    else {
+                        echo "Aucun mode d'exécution sélectionné (ni 'Lancer tout', ni 'Lancer selon le choix')."
                     }
                 }
             }
