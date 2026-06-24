@@ -22,10 +22,10 @@ pipeline {
                     else {
                         switch(params.ENV_CHOICE) {
                             case 'ENV_1':
-                                sh "newman run collection_avec_env.json -e environements/env1.postman_environment.json"
+                                sh "newman run env1_collection.json -e environements/env1.postman_environment.json"
                                 break
                             case 'ENV_2':
-                                sh "newman run collection_avec_env.json -e environements/env2.postman_environment.json"
+                                sh "newman run env2_collection.json -e environements/env2.postman_environment.json"
                                 break
                         }
                         
