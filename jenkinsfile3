@@ -1,0 +1,20 @@
+pipeline {
+    agent {
+        docker { 
+            image 'postman/newman:latest'
+            args '-u=root --entrypoint='
+        }  
+    }
+
+    stages {
+        stage('Lancer le test') {
+            steps {                    
+                        echo "Exécution de la collection 2"
+                        sh "newman run env1_collection.json -e environements/env3.postman_environment.json"
+                    
+            }
+
+        }
+}
+}
+    

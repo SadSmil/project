@@ -1,0 +1,51 @@
+pipeline {
+    agent {
+        docker { 
+            image 'postman/newman:latest'
+            args '-u=root --entrypoint='
+        }  
+    }
+    
+    parameters {
+        
+        booleanParam(name: 'ouinon', defaultValue: false, description: 'si oui alors on lance tous')
+        
+        choice(name: 'Environements', choices: ['Env_1', 'Env2','Env2'], description: 'Choix de l\'environnement si la case ci-dessus est activée')
+    }
+
+    stages {
+        stage('Lancer le test') {
+            steps {
+                script {
+                    if (params.ouinon) {
+                        echo "Exécution globale de  les deux tests..."
+                        sh "newman run env1_collection.json -e environements/env1.postman_environment.json"
+                        sh "newman run env1_collection.json -e environements/env2.postman_environment.json"
+                    }                     
+                    else {
+                            echo "Exécution ciblée avec environnement. Choix : ${params.Environements}"
+                            
+                            switch(params.Environements) {
+                                case 'Env_1': 
+                                    sh "newman run env1_collection.json -e environements/env1.postman_environment.json"
+                                    break
+                                    
+                                case 'Env2': 
+                                    sh "newman run env1_collection.json -e environements/env2.postman_environment.json"
+                                    break
+                                                                    
+                            }
+                        }
+                    }
+                }
+            }
+        
+
+        stage('Appeler le Job 3') {
+            steps {
+                echo "Déclenchement de le troisieme Jenkinsfile..."
+                build job: 'jenkinsfile3', wait: true
+            }
+        }
+    }
+}

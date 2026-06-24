@@ -23,7 +23,6 @@ pipeline {
                         sh 'newman run collection.json'
                         sh "newman run env1_collection.json -e environements/env1.postman_environment.json"
                         sh "newman run env2_collection.json -e environements/env2.postman_environment.json"
-                        sh "newman run env3_collection.json -e environements/env3.postman_environment.json"
                     } 
                     
                     else {
@@ -52,6 +51,13 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        stage('Appeler le Job 2') {
+            steps {
+                echo "Déclenchement du deuxième Jenkinsfile..."
+                build job: 'jenkinsfile2', wait: true
             }
         }
     }
